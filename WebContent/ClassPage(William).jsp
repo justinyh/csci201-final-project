@@ -107,42 +107,56 @@
 	// Needs like value of +1 or -1, commentID, and userID
 	function sendLike(likeValue, userID, commentID) {
 		$.ajax({
-			url: "LikeHandler?likeValue=" + likeValue + "&user=" + userID + "&comment=" + commentID,
+			url: "like?likeValue=" + likeValue + "&user=" + userID + "&comment=" + commentID,
 			method: "GET",
 			success: function() {
-				// CSS CHANGE
+				// CSS CHANGE, increment like counter
 			},
 			error: function(data, err, res) {
-			$("#error").html(data.responseText);
+				$("#error").html(data.responseText);
 			}
 		})
 	}
 </script>
 </head>
 <body>
+	<%@ page import="obj.Comment" %>
+	<%@ page import="java.util.List" %>
+	<%@ page import="obj.Course" %>
+
 	<div class = "container">
-		<div class = "header">
-		</div>
+		<div class = "header"></div>
 		<div class = "classContent">
-			
+		<% Course current = (Course) request.getAttribute("Course"); %>
+		<% List<Comment> comments = current.getComments(); %>
+		<%= current.getCourseName() %>
+		<%= current.getCurrUser() %>
+		<% for (int i = 0; i < comments.size(); i++) { %>
+			<div class="comment">
+				<span><%= comments.get(i).getUserName() %></span>
+				<span><%= comments.get(i).getCommentDate() %></span>
+				<span><%= comments.get(i).getCommentBody() %></span>
+				<span><%= comments.get(i).getTotalLikes() %></span>
+			</div>
+		<% } %>
 		</div>
 		<div class = "responses">
 			<table id="table" border="1" >
-					<div class = "newComment">
-						<div class = "input">
-							<div class = "text_area">
-								<textarea id = "textarea" maxlength = "350" placeholder = "Please add your comment here" style="resize: none"></textarea>
-							</div>
-							<div class = "submitForm">
-								<button id = "show-modal" onclick = "toggleModal()">Continue Your Review</button>
-							</div>
-							<div class = "wordcount">
-								<span id="chars" >350 characters</span>
-							</div>
-							
-							
+				<div class = "newComment">
+					<div class = "input">
+						<div class = "text_area">
+							<textarea id = "textarea" maxlength = "350" placeholder = "Please add your comment here" style="resize: none"></textarea>
 						</div>
+						<div class = "submitForm">
+							<button id = "show-modal" onclick = "toggleModal()">Continue Your Review</button>
+						</div>
+						<div class = "wordcount">
+							<span id="chars" >350 characters</span>
+						</div>
+						
+						
 					</div>
+				</div>
 			</table>
 		</div>
 		<div class = "modal modal--hidden">
@@ -150,7 +164,9 @@
 				<div class = "modal_close">
 					<span>X</span>
 				</div>
-				<form id = "submitReview">
+				<form id = "submitReview" action = "CommentServlet">
+					<input type="hidden" id="custId" name="userID" value=12 <%-- "${user.getID}" --%>>
+					<input type="hidden" id="custId" name="courseID" value=13>
 					<label class="slider_title" for="difficulty">Class Difficulty</label>
 					<input class="slider" type="range" name="difficulty" min="1" max="5" value="3" id="class_difficulty">
 					<p style="bottom: 78px;" class="value" id="class_d_value"></p>

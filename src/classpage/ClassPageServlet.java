@@ -1,12 +1,8 @@
+package classpage;
 
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Date;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -15,17 +11,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import obj.Course;
+import obj.DAO;
+
 /**
  * Servlet implementation class PageGenerator
  */
-@WebServlet("/PageGenerator")
-public class PageGenerator extends HttpServlet {
+@WebServlet("/classpage")
+public class ClassPageServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public PageGenerator() {
+    public ClassPageServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -35,35 +34,18 @@ public class PageGenerator extends HttpServlet {
 	 */
 	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
-		Connection conn = null;
-		Statement st = null;
-		ResultSet rs = null, rsLikes = null;
-		String courseID =  request.getParameter("courseID");
+
+		int UserID = 1;
+		int CourseID = Integer.parseInt(request.getParameter("class"));
 		try {
-			conn = DriverManager.getConnection("");
-			st = conn.createStatement();
-			rs = st.executeQuery("SELECT * FROM Courses;");
-			rs = st.executeQuery("SELECT * FROM Comments WHERE CourseId=" + courseID + ";");
-			while (rs.next()) {
-				// make comment objects, put into course objects
-				int CommentID = rs.getInt("CommentID");
-				String CommentBody = rs.getString("Body");
-				Date date = rs.getDate("Time");
-				Comment temp = new Comment(CommentID, CommentBody, date);
-				rsLikes = st.executeQuery("SELECT LikeValue FROM Likes WHERE CommentID='" + CommentID + "';");
-				while (rsLikes.next()) {
-					temp.addLikeValue(rsLikes.getInt("LikeValue"));
-				}
-			}
-			rs = st.executeQuery("SELECT * FROM Likes WHERE ;");
-			while (rs.next()) {
-				// add like information to comment objects
-			}
-			request.setAttribute("Page", "");
-			RequestDispatcher rd = request.getRequestDispatcher("");
+			DAO db = new DAO();
+			Course currCourse = db.getCourseInfo(CourseID, UserID);
+			
+			request.setAttribute("Course", currCourse);
+			RequestDispatcher rd = request.getRequestDispatcher("/ClassPage(William).jsp");
 			rd.forward(request, response);
 		} catch (SQLException e) {
-			
+			request.setAttribute("error", "There was an error.");
 		}
 	}
 
